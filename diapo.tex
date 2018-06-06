@@ -1,0 +1,138 @@
+\documentclass[ignorenonframetext,]{beamer}
+\PassOptionsToPackage{hyphens}{url}
+\usepackage{pgfpages}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{caption label separator}{: }
+\setbeamercolor{caption name}{fg=normal text.fg}
+\beamertemplatenavigationsymbolsempty
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{textcomp} % provides euro and other symbols
+\usetheme[]{theme}
+\IfFileExists{microtype.sty}{%
+\usepackage[]{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+%\setlength{\parindent}{0pt}
+%\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\urlstyle{same}  % don't use monospace font for urls
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Prevent slide breaks in the middle of a paragraph:
+\widowpenalties 1 10000
+\raggedbottom
+\setbeamertemplate{section page}{
+\begin{beamercolorbox}[sep=12pt,center]{part title}
+  \usebeamerfont{section title}\insertsection\par
+\end{beamercolorbox}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\setcounter{secnumdepth}{0}
+
+% set default figure placement to htbp
+%\makeatletter
+%\def\fps@figure{htbp}
+%\makeatother
+
+
+\title{Les réseaux de neurones}
+\author{Fabien Bernier, Elouen Ginat \& Simon Thoby}
+\date{Juin 2018}
+
+\begin{document}
+\section*{Présentation}
+\frame{\titlepage}
+
+\begin{frame}{Sommaire}
+\tableofcontents
+\end{frame}
+
+\section{Les réseaux de neurones}
+\frame{\sectionpage}
+\begin{frame}{Prenons un exemple simple}
+
+\includegraphics{net.png}
+
+\end{frame}
+
+\begin{frame}{}
+
+\includegraphics{net2.png}
+
+\end{frame}
+
+\begin{frame}{Modélisons une porte logique ET}
+
+	\only<1>{\includegraphics{porte-and-2.png}}
+	\only<2>{\includegraphics{porte-and-3.png}}
+	\only<3>{\includegraphics{porte-and-4.png}}
+
+\end{frame}
+
+\begin{frame}{La reconnaissance de villes (algorithme à seuil)}
+\includegraphics{filtre_vs_seuil.png}
+\end{frame}
+
+\section{La rétropropagation}
+\frame{\sectionpage}
+\begin{frame}{}
+
+\[ P^{(k)} = W^{(k)}Y^{(k-1)}+B^{(k)}  \]
+
+\[ \alpha : x \mapsto \frac{1}{1+e^{-x}} \]
+
+\[ Y^{(k)} = \tilde\alpha(P^{(k)}) \]
+
+\[ E = \frac{1}{2} \sum_{i=1}^l (y_i^{(n)}-a_i)^2 \]
+
+\end{frame}
+
+\begin{frame}{}
+
+\[ b_i^{(n)} \longleftarrow b_i^{(n)} - \eta \frac{\partial{E}}{\partial{b_i^{(n)}}} \]
+
+\[ w_{ij}^{(n)} \longleftarrow w_{ij}^{(n)} - \eta \frac{\partial{E}}{\partial{w_{ij}^{(n)}}} \]
+
+\[ \frac{\partial{E}}{\partial{b_i^{(n)}}} = \frac{\partial{E}}{\partial{p_i^{(n)}}} \frac{\partial{p_i^{(n)}}}{\partial{b_i^{(n)}}} \]
+
+\[ p_i^{(n)} = \sum_{j=1}^l w_{ij}^{(n)} y_j^{(n-1)} + b_i^{(n)} \]
+
+\end{frame}
+
+\begin{frame}{}
+
+\[ \delta_i^{(n)} = \frac{\partial{E}}{\partial{p_i^{(n)}}} = \frac{\partial{E}}{\partial{b_i^{(n)}}} \]
+
+\[ \delta_i^{(n)} = \frac{\partial{E}}{\partial{p_i^{(n)}}} = \frac{\partial{E}}{\partial{y_i^{(n)}}} \frac{\partial{y_i^{(n)}}}{\partial{p_i^{(n)}}} \]
+
+\[ y_i^{(n)} = \alpha(p_i^{(n)}) \implies \frac{\partial{y_i^{(n)}}}{\partial{p_i^{(n)}}} = \alpha'(p_i^{(n)}) \]
+
+\[ E = \frac{1}{2} \sum_{i=1}^l (y_i^{(n)}-a_i)^2 \implies \frac{\partial{E}}{\partial{y_i^{(n)}}} = y_i^{(n)} - a_i \]
+
+\end{frame}
+
+\begin{frame}{}
+
+\[ \delta_i^{(n)} = \alpha'(p_i^{(n)}) (y_i^{(n)} - a_i) \]
+
+\[ \frac{\partial{E}}{\partial{w_{ij}^{(n)}}} = \frac{\partial{E}}{\partial{p_i^{(n)}}} \frac{\partial{p_i^{(n)}}}{\partial{w_{ij}^{(n)}}} \]
+
+\[ p_i^{(n)} = \sum_{j=1}^l w_{ij}^{(n)} y_j^{(n-1)} + b_i^{(n)} \implies \frac{\partial{E}}{\partial{w_{ij}^{(n)}}} = y_j^{(n-1)} \]
+
+\[ \frac{\partial{E}}{\partial{p_i^{(n)}}} = \delta_i^{(n)} = \alpha'(p_i^{(n)}) (y_i^{(n)} - a_i) \]
+
+\[ \frac{\partial{E}}{\partial{w_{ij}^{(n)}}} = \alpha'(p_i^{(n)}) (y_i^{(n)} - a_i) y_j^{(n-1)} \]
+
+\end{frame}
+
+\end{document}

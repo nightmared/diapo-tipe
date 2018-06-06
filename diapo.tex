@@ -8,7 +8,6 @@
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
 \usepackage{ifxetex,ifluatex}
-\usepackage{fixltx2e} % provides \textsubscript
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{textcomp} % provides euro and other symbols
@@ -59,16 +58,33 @@
 
 \section{Les réseaux de neurones}
 \frame{\sectionpage}
-\begin{frame}{Prenons un exemple simple}
-
-\includegraphics{net.png}
-
+\begin{frame}{Structure générale}
+	\includegraphics{net-without-train.png}
 \end{frame}
 
-\begin{frame}{}
+\begin{frame}{Fonctionnement du réseau}
+	\begin{itemize}
+		\item Accepte un vecteur en entrée : que l'on considére comme la première couche, notée $ Y_0 $ \\
+		\item Pour chaque couche, on génére un nouveau vecteur à partir de la couche précédente en effectuant une somme pondérée des valeurs de la couche précédente : \[ Y_n = \alpha(W_n . Y_{n-1} + B_n) \]
+			Avec :
+		\begin{itemize}
+			\item $ \alpha $ : une fonction qui sert à améliorer l'efficacité du réseau en normalisant les sorties, classiquement $ \alpha : x \mapsto \frac{1}{1+e^{-x}} $
+			\item $ W_n $ : les poids de passage de la couche $ n-1 $ à $ n $
+			\item $ B_n $ : les biais de la couche $ n $, qui permettent au réseau d'approximer des fonctions qui ne s'annulent pas quand l'entrée est nulle
+		\end{itemize}
+		%\includegraphics{net2.png}
+		\item Retourne un vecteur en sortie : la sortie de la dernière couche, c'est-à-dire $ Y_n $
+	\end{itemize}
+\end{frame}
 
-\includegraphics{net2.png}
-
+\begin{frame}{Approximation d'une fonction}
+	À l'instar du théorème d'approximation d'une fonction continue par un polynôme (Stone-Weierstrass), les réseaux de neurones ont pour but d'approximer une fonction (dont on ne connaît généralement pas l'expression) en utilisant l'algorithme dit de «descente du gradient». Le principe est le suivant:
+	\begin{itemize}
+		\item Le gradient indique la direction de l'augmentation d'une fonction.
+		\item On peut donc considérer la fonction $E$ qui indique l'«erreur» du réseau, c'est à dire la distance entre les sorties du réseau et les valeurs attendues en sortie.
+		\item Notre but est donc de faire tendre les sorties du réseau vers les valeurs attendues, donc de minimiser cette fonction.
+		\item Pour ce faire, on dérive l'erreur par rapport aux paramètres de notre réseau (les poids et les biais)
+	\end{itemize}
 \end{frame}
 
 \begin{frame}{Modélisons une porte logique ET}
@@ -77,10 +93,6 @@
 	\only<2>{\includegraphics{porte-and-3.png}}
 	\only<3>{\includegraphics{porte-and-4.png}}
 
-\end{frame}
-
-\begin{frame}{La reconnaissance de villes (algorithme à seuil)}
-\includegraphics{filtre_vs_seuil.png}
 \end{frame}
 
 \section{La rétropropagation}
@@ -134,5 +146,15 @@
 \[ \frac{\partial{E}}{\partial{w_{ij}^{(n)}}} = \alpha'(p_i^{(n)}) (y_i^{(n)} - a_i) y_j^{(n-1)} \]
 
 \end{frame}
+
+\section{Localisation des villes}
+\frame{\sectionpage}
+\begin{frame}{Identifier la présence de villes (algorithme à seuil)}
+%\includegraphics{principe-convolution.png}
+%\includegraphics{image-exemple.png}
+%\includegraphics{convolution-exemple.png}
+\includegraphics{filtre_vs_seuil.png}
+\end{frame}
+
 
 \end{document}

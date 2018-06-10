@@ -191,13 +191,17 @@ Fort heureusement, on vient de calculer $ \frac{\partial{E}}{\partial{y_i^n}} $ 
 \begin{frame}{Un exemple simple: un porte logique ET à trois entrées}
     \begin{flalign*}
         \frac{\partial{E}}{\partial{b_i^1}} &= \frac{\partial{E}}{\partial{y_i^1}} &\\
-        &= \frac{\partial{E}}{\partial{y_1^2}} \frac{\partial{y_1^2}}{\partial{b_i^1}} + \frac{\partial{E}}{\partial{y_2^2}} \frac{\partial{y_2^2}}{\partial{b_i^1}} &\\
-        &= w_{i1}^2 * (y_1^2-a_1) + w_{i2}^2 * (y_2^2-a_2) &\\
-        \frac{\partial{E}}{\partial{w_{ki}^1}} &= \frac{\partial{E}}{\partial{y_1^2}} \frac{\partial{y_1^2}}{\partial{w_{ki}^1}} + \frac{\partial{E}}{\partial{y_2^2}} \frac{\partial{y_2^2}}{\partial{w_{ki}^1}} &\\
-        &= y_k^0 * w_{i1}^2 * (y_1^2-a_1) + y_k^0 * w_{i2}^2 * (y_2^2-a_2)
+        &= \frac{\partial{E}}{\partial{y_1^2}} \frac{\partial{y_1^2}}{\partial{y_1^1}} \frac{\partial{y_1^1}}{\partial{b_i^1}} &\\
+        &= w_{i1}^2 * (y_1^2-a_1) &\\
+        \frac{\partial{E}}{\partial{w_{ki}^1}} &= \frac{\partial{E}}{\partial{y_1^2}} \frac{\partial{y_1^2}}{\partial{y_1^1}} \frac{\partial{y_1^1}}{\partial{w_{ki}^1}} &\\
+        &= y_k^0 * w_{i1}^2 * (y_1^2-a_1)
     \end{flalign*}
-    //TODO: add diagramm
 \end{frame}
+
+\begin{frame}{Un exemple simple: un porte logique ET à trois entrées}
+    \includegraphics{graph.png}
+\end{frame}
+
 %\begin{frame}{}
 %
 %\[ P^{(k)} = W^{(k)}Y^{(k-1)}+B^{(k)}  \]

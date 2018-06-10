@@ -149,11 +149,13 @@
     \end{flalign*}
 \end{frame}
 \begin{frame}{La rétropropagation - Suite}
-    Les choses se compliquent néanmoins pour les couches précédentes: en effet, la dérivée de l'erreur d'un neuron de la couche $k$ dépend de la dérivée de l'erreur en fonction de tous les neurones de la couche $k+1$ :
+    Les choses se compliquent néanmoins pour les couches précédentes: en effet, la dérivée de l'erreur en fonction du poids ou des biais d'un neurone de la couche $k$ dépend de la dérivée de l'erreur en fonction de tous les neurones de la couche $k+1$ :
     \[ \frac{\partial{E}}{\partial{b_1^k}} = \sum_{i=0}^l \frac{\partial{E}}{\partial{y_i^{k+1}}} \frac{\partial{y_i^{k+1}}}{\partial{b_1^k}} \]
 Fort heureusement, on vient de calculer $ \frac{\partial{E}}{\partial{y_i^n}} $ et on peut simplement calculer $ \frac{\partial{y_i^n}}{\partial{b_1^{n-1}}} $. On peut donc mettre à jour les poids et les biais de la couche $n-1$. En appliquant récursivement cette méthode, on peut ainsi actualiser tous les poids et tous les biais du réseau.
 \end{frame}
 
+\section{Exemple}
+\frame{\sectionpage}
 \begin{frame}{Un exemple simple: un porte logique ET à trois entrées}
     \begin{tikzpicture}
     [   cnode/.style={draw=black,fill=####1,minimum width=3mm,circle},
@@ -170,14 +172,31 @@ Fort heureusement, on vient de calculer $ \frac{\partial{E}}{\partial{y_i^n}} $ 
             }
         }
     \end{tikzpicture}
+    //TODO: add logical table
+\end{frame}
+
+\begin{frame}{Un exemple simple: un porte logique ET à trois entrées}
+    $ \forall i \in \{1, 2\}, \forall k \in \{1, 2, 3\} $
+    \begin{flalign*}
+        \alpha &= id &\\
+        y_i^1 &= w_{1i}^1 * y_1^0 + w_{2i}^1 * y_2^0 + w_{3i}^1 * y_3^0 + b_i^1 &\\
+        y_1^2 &= w_{11}^2 * y_1^1 + w_{21}^2 * y_2^1 + b_k^2 &\\
+        E &= \frac{(y_1^2-a_1)^2}{2} &\\
+        \frac{\partial{E}}{\partial{b_1^2}} &= \frac{\partial{E}}{\partial{y_1^2}} &\\
+        &= y_1^2-a_1 &\\
+        \frac{\partial{E}}{\partial{w_{i1}^2}} &= y_i^1 * (y_1^2-a_1) &
+    \end{flalign*}
 \end{frame}
 
 \begin{frame}{Un exemple simple: un porte logique ET à trois entrées}
     \begin{flalign*}
-        \alpha &= id &\\
-        y_k^1 &= w_{1k}^1 * y_1^0 + w_{2k}^1 * y_2^0 + w_{3k}^1 * y_3^0 + b_k^1 &\\
-        y_k^2 &= w_{1k}^2 * y_1^1 + w_{2k}^2 * y_2^1 + b_k^2 &
+        \frac{\partial{E}}{\partial{b_i^1}} &= \frac{\partial{E}}{\partial{y_i^1}} &\\
+        &= \frac{\partial{E}}{\partial{y_1^2}} \frac{\partial{y_1^2}}{\partial{b_i^1}} + \frac{\partial{E}}{\partial{y_2^2}} \frac{\partial{y_2^2}}{\partial{b_i^1}} &\\
+        &= w_{i1}^2 * (y_1^2-a_1) + w_{i2}^2 * (y_2^2-a_2) &\\
+        \frac{\partial{E}}{\partial{w_{ki}^1}} &= \frac{\partial{E}}{\partial{y_1^2}} \frac{\partial{y_1^2}}{\partial{w_{ki}^1}} + \frac{\partial{E}}{\partial{y_2^2}} \frac{\partial{y_2^2}}{\partial{w_{ki}^1}} &\\
+        &= y_k^0 * w_{i1}^2 * (y_1^2-a_1) + y_k^0 * w_{i2}^2 * (y_2^2-a_2)
     \end{flalign*}
+    //TODO: add diagramm
 \end{frame}
 %\begin{frame}{}
 %

@@ -17,6 +17,7 @@
 %\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 %}{}
 \usepackage{multicol}
+\usepackage{wrapfig}
 \usepackage{tikz}
 \usetikzlibrary{shadows,arrows,positioning}
 %\setlength{\parindent}{0pt}
@@ -41,7 +42,7 @@
 \setlength{\emergencystretch}{3em}  % prevent overfull lines
 \setcounter{secnumdepth}{0}
 
-\title{Les réseaux de neurones}
+\title{Reconnaissance d'une frontière à l'aide de réseaux neuronaux}
 \author{Fabien Bernier, Elouen Ginat \& Simon Thoby}
 \date{Juin 2018}
 
@@ -60,7 +61,7 @@
 \end{frame}
 
 \begin{frame}{Fonctionnement du réseau}
-    - Accepte un vecteur en entrée : que l'on considére comme la première couche, notée $ Y^0 $ \\
+    - Accepte un vecteur en entrée : que l'on considére comme la dernière couche, notée $ Y^0 $ \\
     - Pour chaque couche, on génére un nouveau vecteur à partir de la couche précédente en effectuant une somme pondérée des valeurs de la couche précédente : \[ Y^n = \tilde\alpha(W^n . Y^{n-1} + B^n) \]
         Avec :
     \begin{itemize}
@@ -154,54 +155,6 @@
 Fort heureusement, on vient de calculer $ \frac{\partial{E}}{\partial{y_i^n}} $ et on peut simplement calculer $ \frac{\partial{y_i^n}}{\partial{b_1^{n-1}}} $. On peut donc mettre à jour les poids et les biais de la couche $n-1$. En appliquant récursivement cette méthode, on peut ainsi actualiser tous les poids et tous les biais du réseau.
 \end{frame}
 
-\section{Exemple}
-\frame{\sectionpage}
-\begin{frame}{Un exemple simple: un porte logique ET à trois entrées}
-    \begin{tikzpicture}
-    [   cnode/.style={draw=black,fill=####1,minimum width=3mm,circle},
-    ]
-        \node[cnode=red,label=0:$y_1^2$] (s) at (6,-2) {};
-        \foreach \x in {1,...,3} {
-            \node[cnode=blue,label=180:$y_\x^1$] (y1-\x) at (0,2-2*\x) {};
-            \node[cnode=blue,label=90:$y_\x^2$] (y2-\x) at (3,2-2*\x) {};
-            \draw (y2-\x) -- node[above,sloped,pos=0.4] {$w_{\x1}^2$} (s);
-        }
-        \foreach \x in {1,...,3} {
-            \foreach \y in {1,...,3} {
-                \draw (y1-\x) -- (y2-\y);
-            }
-        }
-    \end{tikzpicture}
-    //TODO: add logical table
-\end{frame}
-
-\begin{frame}{Un exemple simple: un porte logique ET à trois entrées}
-    $ \forall i \in \{1, 2\}, \forall k \in \{1, 2, 3\} $
-    \begin{flalign*}
-        \alpha &= id &\\
-        y_i^1 &= w_{1i}^1 * y_1^0 + w_{2i}^1 * y_2^0 + w_{3i}^1 * y_3^0 + b_i^1 &\\
-        y_1^2 &= w_{11}^2 * y_1^1 + w_{21}^2 * y_2^1 + b_k^2 &\\
-        E &= \frac{(y_1^2-a_1)^2}{2} &\\
-        \frac{\partial{E}}{\partial{b_1^2}} &= \frac{\partial{E}}{\partial{y_1^2}} &\\
-        &= y_1^2-a_1 &\\
-        \frac{\partial{E}}{\partial{w_{i1}^2}} &= y_i^1 * (y_1^2-a_1) &
-    \end{flalign*}
-\end{frame}
-
-\begin{frame}{Un exemple simple: un porte logique ET à trois entrées}
-    \begin{flalign*}
-        \frac{\partial{E}}{\partial{b_i^1}} &= \frac{\partial{E}}{\partial{y_i^1}} &\\
-        &= \frac{\partial{E}}{\partial{y_1^2}} \frac{\partial{y_1^2}}{\partial{y_1^1}} \frac{\partial{y_1^1}}{\partial{b_i^1}} &\\
-        &= w_{i1}^2 * (y_1^2-a_1) &\\
-        \frac{\partial{E}}{\partial{w_{ki}^1}} &= \frac{\partial{E}}{\partial{y_1^2}} \frac{\partial{y_1^2}}{\partial{y_1^1}} \frac{\partial{y_1^1}}{\partial{w_{ki}^1}} &\\
-        &= y_k^0 * w_{i1}^2 * (y_1^2-a_1)
-    \end{flalign*}
-\end{frame}
-
-\begin{frame}{Un exemple simple: un porte logique ET à trois entrées}
-    \includegraphics{graph.png}
-\end{frame}
-
 %\begin{frame}{}
 %
 %\[ P^{(k)} = W^{(k)}Y^{(k-1)}+B^{(k)}  \]
@@ -252,21 +205,122 @@ Fort heureusement, on vient de calculer $ \frac{\partial{E}}{\partial{y_i^n}} $ 
 %
 %\end{frame}
 
-\section{Localisation des villes}
+%\section{Localisation des villes}
+%\frame{\sectionpage}
+%\begin{frame}{Base de données}
+%    - 1615 images traitées manuellement (issues de la NASA) \\
+%    - $\approx$ 5000 images générées artificiellement \\
+%	\includegraphics[width=0.5\linewidth]{images-gen.png}
+%	\includegraphics[width=0.5\linewidth]{images-real.png}
+%\end{frame}
+%\begin{frame}{Identifier la présence de villes - prétraitement}
+%    Afin de ne passer aux réseau que des images qui comportent une ville, un prétraitement est appliqué: une convolution sur l'image puis un traitement par seuil est utilisé (si le pixel de couleur maximale obtenu excède un certain seuil, on considère que l'image comporte une ville et on demande alors au réseau d'identifier sa position).
+%%\includegraphics{principe-convolution.png}
+%%\includegraphics{image-exemple.png}
+%%\includegraphics{convolution-exemple.png}
+%Efficacité d'un algorithme à seuil:
+%//TODO: better graph
+%\includegraphics{filtre_vs_seuil.png}
+%\end{frame}
+
+
+\section{Fabrication d'une base de données}
 \frame{\sectionpage}
-\begin{frame}{Base de données}
-    - 1615 images traitées manuellement (issues de la NASA) \\
-    - $\approx$ 5000 images générées artificiellement \\
-    // TODO: add image of the cities (both of training and real images)
+\begin{frame}{Milieux terre - mer}
+	\includegraphics{fabricationImage.png}
 \end{frame}
-\begin{frame}{Identifier la présence de villes - prétraitement}
-    Afin de ne passer aux réseau que des images qui comportent une ville, un prétraitement est appliqué: une convolution sur l'image puis un traitement par seuil est utilisé (si le pixel de couleur maximale obtenu excède un certain seuil, on considère que l'image comporte une ville et on demande alors au réseau d'identifier sa position).
-%\includegraphics{principe-convolution.png}
-%\includegraphics{image-exemple.png}
-%\includegraphics{convolution-exemple.png}
-Efficacité d'un algorithme à seuil:
-//TODO: better graph
-\includegraphics{filtre_vs_seuil.png}
+
+\begin{frame}{Frontière par une courbe de Bézier}
+	\includegraphics{procede1.png}
+\end{frame}
+
+\begin{frame}{Application d'un flou et d'une rotation}
+	\includegraphics{procede2.png}
+	\begin{center}
+		\includegraphics[width=.3\linewidth]{flou.png}
+	\end{center}
+\end{frame}
+
+\begin{frame}{Variations lumineuses}
+	\includegraphics{procede3.png}
+\end{frame}
+
+\begin{frame}{}
+	\includegraphics{tableau.png}
+\end{frame}
+
+\section{Résultats}
+\frame{\sectionpage}
+\begin{frame}{Structure du réseau}
+	Notre réseau est découpé en deux réseaux de neurones distincts :\\
+	\quad - le premier détecte la présence d'une frontière sur une image;\\
+	\quad - le second traite uniquement les images contenant une frontière, et nous indique la courbe de la frontière sur cette image.\\
+	\vspace*{5px}
+	On pourrait envisager que le réseau retourne des couples de positions pour la frontière, mais il n'est pas possible de connaître à l'avance la longueur de la frontière, et donc le nombre de sorties qui seraient nécessaires. Nous nous sommes donc tournés vers les courbes de Bézier. Il s'agit de courbes polynomiales définies par un certain nombres de points de contrôle (6 dans notre cas):\\
+	\vspace*{-5px}
+	\begin{center}
+		\includegraphics[width=0.35\textwidth]{bezier.png}
+	\end{center}
+\end{frame}
+
+\section{Annexe}
+\frame{\sectionpage}
+\begin{frame}{Un exemple simple: un porte logique ET à trois entrées}
+	\begin{tikzpicture}
+	[   cnode/.style={draw=black,fill=####1,minimum width=3mm,circle},
+		]
+		\node[cnode=red,label=0:$y_1^2$] (s) at (4.5,-2) {};
+		\foreach \x in {1,...,3} {
+			\node[cnode=blue,label=180:$y_\x^1$] (y1-\x) at (0,2-2*\x) {};
+		}
+		\foreach \x in {1,...,2} {
+			\node[cnode=blue,label=90:$y_\x^2$] (y2-\x) at (2,1-2*\x) {};
+			\draw (y2-\x) -- node[above,pos=0.4] {$w_{\x1}^2$} (s);
+		}
+		\foreach \x in {1,...,3} {
+			\foreach \y in {1,...,2} {
+				\draw (y1-\x) -- (y2-\y);
+			}
+		}
+	\end{tikzpicture}
+	\begin{tabular}{ c|c|c||c }
+		A & B & C & Sortie \\
+		\hline
+		0 & 0 & 0 & 0 \\
+		0 & 0 & 1 & 0 \\
+		0 & 1 & 0 & 0 \\
+		1 & 0 & 0 & 0 \\
+		0 & 1 & 1 & 0 \\
+		1 & 1 & 0 & 0 \\
+		1 & 0 & 1 & 0 \\
+		1 & 1 & 1 & 1 \\
+	\end{tabular}
+\end{frame}
+
+\begin{frame}{Un exemple simple: un porte logique ET à trois entrées}
+    $ \forall i \in \{1, 2\}, \forall k \in \{1, 2, 3\} $
+    \begin{flalign*}
+        y_1^1 &= w_{11}^1 * y_1^0 + w_{21}^1 * y_2^0 + w_{31}^1 * y_3^0 + b_1^1 &\\
+        y_2^1 &= w_{12}^1 * y_1^0 + w_{22}^1 * y_2^0 + w_{32}^1 * y_3^0 + b_2^1 &\\
+        y_1^2 &= w_{11}^2 * y_1^1 + w_{21}^2 * y_2^1 + b_1^2 &\\\\
+        E &= \frac{(y_1^2-a_1)^2}{2} &\\\\
+        \frac{\partial{E}}{\partial{b_1^2}} &= \frac{\partial{E}}{\partial{y_1^2}} = y_1^2-a_1 &\\
+        \frac{\partial{E}}{\partial{w_{i1}^2}} &= y_i^1 * (y_1^2-a_1) &
+    \end{flalign*}
+\end{frame}
+
+\begin{frame}{Un exemple simple: un porte logique ET à trois entrées}
+    \begin{flalign*}
+        \frac{\partial{E}}{\partial{b_i^1}} &= \frac{\partial{E}}{\partial{y_i^1}} &\\
+        &= \frac{\partial{E}}{\partial{y_1^2}} \frac{\partial{y_1^2}}{\partial{y_1^1}} \frac{\partial{y_1^1}}{\partial{b_i^1}} &\\
+        &= w_{i1}^2 * (y_1^2-a_1) &\\
+        \frac{\partial{E}}{\partial{w_{ki}^1}} &= \frac{\partial{E}}{\partial{y_1^2}} \frac{\partial{y_1^2}}{\partial{y_1^1}} \frac{\partial{y_1^1}}{\partial{w_{ki}^1}} &\\
+        &= y_k^0 * w_{i1}^2 * (y_1^2-a_1)
+    \end{flalign*}
+\end{frame}
+
+\begin{frame}{Un exemple simple: un porte logique ET à trois entrées}
+    \includegraphics{graph.png}
 \end{frame}
 
 

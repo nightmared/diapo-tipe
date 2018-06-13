@@ -16,10 +16,9 @@
 %\usepackage[]{microtype}
 %\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 %}{}
-\usepackage{multicol}
-\usepackage{wrapfig}
 \usepackage{tikz}
 \usetikzlibrary{shadows,arrows,positioning}
+\usepackage{pgfplots}
 %\setlength{\parindent}{0pt}
 %\setlength{\parskip}{6pt plus 2pt minus 1pt}
 \urlstyle{same}  % don't use monospace font for urls
@@ -39,48 +38,55 @@
   \usebeamerfont{section title}\insertsection\par
 \end{beamercolorbox}
 }
-\setlength{\emergencystretch}{3em}  % prevent overfull lines
-\setcounter{secnumdepth}{0}
+%\setlength{\emergencystretch}{3em}  % prevent overfull lines
+%\setcounter{secnumdepth}{0}
 
 \title{Reconnaissance d'une frontière à l'aide de réseaux neuronaux}
 \author{Fabien Bernier, Elouen Ginat \& Simon Thoby}
 \date{Juin 2018}
 
 \begin{document}
-\section*{Présentation}
+\section{Les réseaux de neurones}
 \frame{\titlepage}
 
-\begin{frame}{Sommaire}
+\begin{frame}{Plan}
 \tableofcontents
 \end{frame}
 
-\section{Les réseaux de neurones}
-\frame{\sectionpage}
 \begin{frame}{Structure générale}
 	\includegraphics{net-without-train.png}
 \end{frame}
 
-\begin{frame}{Fonctionnement du réseau}
-    - Accepte un vecteur en entrée : que l'on considére comme la dernière couche, notée $ Y^0 $ \\
-    - Pour chaque couche, on génére un nouveau vecteur à partir de la couche précédente en effectuant une somme pondérée des valeurs de la couche précédente : \[ Y^n = \tilde\alpha(W^n . Y^{n-1} + B^n) \]
-        Avec :
-    \begin{itemize}
-        \item $ \alpha $ : une fonction (dérivable) qui sert à améliorer l'efficacité du réseau en normalisant les sorties, classiquement $ \alpha : x \mapsto \frac{1}{1+e^{-x}} $
-        \item $\tilde\alpha$ : la fonction $\alpha$ appliquée à chacun des élements d'un vecteur.
-        \item $ W^n $ : les poids de passage de la couche $ n-1 $ à $ n $
-        \item $ B^n $ : les biais de la couche $ n $, qui permettent au réseau d'approximer des fonctions qui ne s'annulent pas quand l'entrée est nulle
-    \end{itemize}
-    - Retourne un vecteur en sortie : la sortie de la dernière couche, c'est-à-dire $ Y^n $
-\end{frame}
+%\begin{frame}{Fonctionnement du réseau}
+%    - Accepte un vecteur en entrée : que l'on considére comme la dernière couche, notée $ Y^0 $ \\
+%    - Pour chaque couche, on génére un nouveau vecteur à partir de la couche précédente en effectuant une somme pondérée des valeurs de la couche précédente : \[ Y^k = \tilde\alpha(W^k . Y^{k-1} + B^k) \]
+%        Avec :
+%    \begin{itemize}
+%        \item $ \alpha $ : une fonction (dérivable) qui sert à améliorer l'efficacité du réseau en normalisant les sorties, classiquement $ \alpha : x \mapsto \frac{1}{1+e^{-x}} $
+%        \item $\tilde\alpha$ : la fonction $\alpha$ appliquée à chacun des élements d'un vecteur.
+%        \item $ W^n $ : les poids de passage de la couche $ n-1 $ à $ n $
+%        \item $ B^n $ : les biais de la couche $ n $, qui permettent au réseau d'approximer des fonctions qui ne s'annulent pas quand l'entrée est nulle
+%    \end{itemize}
+%    - Retourne un vecteur en sortie : la sortie de la dernière couche, c'est-à-dire $ Y^n $
+%\end{frame}
 
-\begin{frame}{Fonctionnement du réseau - Suite}
-	On dispose pour créer le réseau de deux jeux de données assez conséquent (typiquement plusieurs milliers d'images dans notre cas) : l'un sert à entraîner le réseau et l'autre sert à en tester l'efficacité.
-    \begin{align*}
-        B^k = \begin{pmatrix} b_1^k \\ b_2^k \\ \vdots \\ b_l^k \end{pmatrix}
-        &&&
-        Y^k = \begin{pmatrix} y_1^k \\ y_2^k \\ \vdots \\ y_l^k \end{pmatrix}
-        \\
-        \tilde\alpha : X = \begin{pmatrix}
+\begin{frame}{Fonctionnement du réseau}
+	%On dispose pour créer le réseau de deux jeux de données assez conséquent (typiquement plusieurs milliers d'images dans notre cas) : l'un sert à entraîner le réseau et l'autre sert à en tester l'efficacité.
+	\begin{center}
+		$ Y^k = \tilde\alpha(W^k . Y^{k-1} + B^k) $ \\
+	\end{center}
+	\begin{tikzpicture}
+		[ >=stealth', thick]
+		\node (y0) at (0, 0) {$Y^0$};
+		\node (y1) at (4, 0) {$Y^1$};
+		\node (y2) at (8, 0) {$Y^2$};
+		\draw[->] (y0) -- node[anchor=south] {$\tilde\alpha(W^1.Y^0+B^1)$} (y1);
+		\draw[->] (y1) -- (y2);
+	\end{tikzpicture}
+
+	Avec :
+    \begin{flalign*}
+		& \tilde\alpha : X = \begin{pmatrix}
             x_1 \\
             x_2 \\
             \vdots \\
@@ -90,120 +96,103 @@
             \alpha(x_2) \\
             \vdots \\
             \alpha(x_n)
-        \end{pmatrix} &&&
-        W^k = \begin{pmatrix}
+		\end{pmatrix} &&\\
+		& W^k = \begin{pmatrix}
             w_{11}^k  & w_{21}^k & \cdots & w_{l1}^k \\
             w_{12}^k  & w_{22}^k & \cdots & w_{l2}^k \\
             \vdots & \vdots & \ddots & \vdots \\
             w_{1l}^k  & w_{2l}^k & \cdots & w_{ll}^k
-        \end{pmatrix}
-    \end{align*}
+		\end{pmatrix} &&
+    \end{flalign*}
+\end{frame}
+
+\begin{frame}{Un exemple de fonction d'activation : la sigmoïde}
+	\begin{tikzpicture}
+
+    \begin{axis}[
+    	legend pos=north west,
+        axis x line=middle,
+        axis y line=middle,
+        x tick label style={/pgf/number format/fixed,
+                            /pgf/number format/fixed zerofill,
+                            /pgf/number format/precision=1},
+        y tick label style={/pgf/number format/fixed,
+                            /pgf/number format/fixed zerofill,
+                            /pgf/number format/precision=1},
+        grid = major,
+        width=12cm,
+        height=6cm,
+        grid style={dashed, gray!30},
+        xmin=-10,     % start the diagram at this x-coordinate
+        xmax= 10,    % end   the diagram at this x-coordinate
+        ymin= 0,     % start the diagram at this y-coordinate
+        ymax= 1,   % end   the diagram at this y-coordinate
+        %axis background/.style={fill=white},
+        xlabel=x,
+        ylabel=y,
+        tick align=outside,
+        enlargelimits=false]
+      % plot the stirling-formulae
+      \addplot[domain=-10:10, red, ultra thick,samples=100] {1/(1+exp(-1*x))};
+      \addlegendentry{$\alpha(x)=\frac{1}{1+e^{-x}}$}
+\end{axis}
+
+
+	\end{tikzpicture}
+
 \end{frame}
 
 \section{La rétropropagation}
-\frame{\sectionpage}
-\begin{frame}{Approximation d'une fonction}
-	À l'instar du théorème d'approximation d'une fonction continue par un polynôme (Stone-Weierstrass), les réseaux de neurones ont pour but d'approximer une fonction dont on ne connaît généralement pas l'expression. Pour ce faire, on utilise généralement l'algorithme dit de «descente du gradient». Le principe est le suivant : \\
-    - Le gradient indique la direction de l'augmentation d'une fonction. \\
-    - On peut donc considérer la fonction $E$ qui indique l'«erreur» du réseau, c'est à dire la distance entre les sorties du réseau et les valeurs attendues en sortie. \\
-    - Notre but est donc de faire tendre les sorties du réseau vers les valeurs attendues, donc de minimiser cette fonction. \\
-\end{frame}
-
-\begin{frame}{Correction des poids et des biais}
-    Les données d'entrées ne sont pas des paramètres de notre fonction d'erreur, car on cherche à réduire l'erreur du réseau en modifiant les variables du réseau et non pas l'entrée, cela n'aurait pas de sens : $ E = E(w_{11}^1, w_{12}^n, ..., w_{ll}^n, b_1^1, n_2^1, ..., b_l^n) $.
-    Pour ce faire, on dérive l'erreur par rapport aux paramètres de notre réseau (les poids et les biais). \\
-    Puis on mets à jour les poids et les biais :
-    \[ w_{ij}^{(n)} \longleftarrow w_{ij}^{(n)} - \eta \frac{\partial{E}}{\partial{w_{ij}^{(n)}}} \]
-    \[ b_i^{(n)} \longleftarrow b_i^{(n)} - \eta \frac{\partial{E}}{\partial{b_i^{(n)}}} \]
-\end{frame}
+%\frame{\sectionpage}
+%\begin{frame}{Approximation d'une fonction}
+%	À l'instar du théorème d'approximation d'une fonction continue par un polynôme (Stone-Weierstrass), les réseaux de neurones ont pour but d'approximer une fonction dont on ne connaît généralement pas l'expression. Pour ce faire, on utilise généralement l'algorithme dit de «descente du gradient». Le principe est le suivant : \\
+%    - Le gradient indique la direction de l'augmentation d'une fonction. \\
+%    - On peut donc considérer la fonction $E$ qui indique l'«erreur» du réseau, c'est à dire la distance entre les sorties du réseau et les valeurs attendues en sortie. \\
+%    - Notre but est donc de faire tendre les sorties du réseau vers les valeurs attendues, donc de minimiser cette fonction. \\
+%\end{frame}
 
 \begin{frame}{La rétropropagation}
-    Les problèmes qui ont longtemps concentrés les efforts de la recherche sur les réseaux de neurones, outre la lourdeur de calcul, tournaient autour de la difficulté à concevoir et entraîner des réseaux multicouches. C'est là que l'algorithme de la rétropropagation appraît : il exploite le \textbf{théorème de dérivation des fonctions composées} pour calculer toutes ces dérivées.\\
-    L'algorithme est itératif, travaillant couche par couche, en partant de la dernière couche et en remontant jusqu'à la couche d'entrée du réseau, d'où son nom. \\
-    Un exemple assez classique de fonction d'erreur est la distance quadratique entre le vecteur obtenu et le vecteur attendu :
+    %Les données d'entrées ne sont pas des paramètres de notre fonction d'erreur, car on cherche à réduire l'erreur du réseau en modifiant les variables du réseau et non pas l'entrée, cela n'aurait pas de sens : $ E = E(w_{11}^1, w_{12}^n, ..., w_{ll}^n, b_1^1, n_2^1, ..., b_l^n) $.
+    %Pour ce faire, on dérive l'erreur par rapport aux paramètres de notre réseau (les poids et les biais). \\
+    %Puis on mets à jour les poids et les biais :
+	\[ E = E(w_{11}^1, w_{12}^1, ..., w_{ll}^n, b_1^1, b_2^1, ..., b_l^n) \]
+    \[ w_{ij}^n \longleftarrow w_{ij}^n - \eta \frac{\partial{E}}{\partial{w_{ij}^n}} \]
+    \[ b_i^n \longleftarrow b_i^n - \eta \frac{\partial{E}}{\partial{b_i^n}} \]
+    %Les problèmes qui ont longtemps concentrés les efforts de la recherche sur les réseaux de neurones, outre la lourdeur de calcul, tournaient autour de la difficulté à concevoir et entraîner des réseaux multicouches. C'est là que l'algorithme de la rétropropagation appraît : il exploite le \textbf{théorème de dérivation des fonctions composées} pour calculer toutes ces dérivées.\\
+    %L'algorithme est itératif, travaillant couche par couche, en partant de la dernière couche et en remontant jusqu'à la couche d'entrée du réseau, d'où son nom. \\
+    %Un exemple assez classique de fonction d'erreur est la distance quadratique entre le vecteur obtenu et le vecteur attendu :
     \[ E = \frac{1}{2} \sum_{i=1}^l (y_i^n-a_i)^2 \]
 \end{frame}
 
-\begin{frame}{La rétropropagation - Suite}
+\begin{frame}{La rétropropagation - Dernière couche}
     Les calculs sont très simples pour la première couche :
     \begin{flalign*}
         \frac{\partial{E}}{\partial{b_k^n}} &= \frac{\partial{E}}{\partial{y_k^n}} \frac{\partial{y_k^n}}{\partial{b_k^n}} &\\
         \text{Or :}  &&\\
         \frac{\partial{E}}{\partial{y_k^n}} &= y_k^n-a_k &\\
-        \frac{\partial{y_k^n}}{\partial{b_k^n}} &= \frac{\partial{(\alpha(\sum_{i=0}^l w_{ik}^n*y_i^{n-1} + b_k^n))}}{\partial{b_k^n}} &\\
-        &= \alpha'(\sum_{i=0}^l w_{ik}^n*y_i^{n-1} + b_k^n) &\\
+        \frac{\partial{y_k^n}}{\partial{b_k^n}} &= \frac{\partial{(\alpha(\sum_{i=0}^l w_{ik}^n*y_i^{n-1} + b_k^n))}}{\partial{b_k^n}} = \alpha'(\sum_{i=0}^l w_{ik}^n*y_i^{n-1} + b_k^n) &\\
         \text{Donc :} &&\\
         \frac{\partial{E}}{\partial{b_k^n}} &= (y_k^n-a_k)*\alpha'(\sum_{i=0}^l w_{ik}^n*y_i^{n-1} + b_k^n) &
     \end{flalign*}
 \end{frame}
 
-\begin{frame}{La rétropropagation - Suite}
+\begin{frame}{La rétropropagation - Dernière couche}
     Il en va de même pour les poids:
     \begin{flalign*}
         \frac{\partial{E}}{\partial{w_{ik}^n}} &= \frac{\partial{E}}{\partial{y_k^n}} \frac{\partial{y_k^n}}{\partial{w_{ik}^n}} &\\
         \text{Or :}  &&&&\\
         \frac{\partial{E}}{\partial{y_k^n}} &= y_k^n-a_k &\\
-        \frac{\partial{y_k^n}}{\partial{w_{ik}^n}} &= \frac{\partial{(\alpha(\sum_{i=0}^l w_{ik}^n*y_i^{n-1} + b_k^n))}}{\partial{w_{ik}^n}} &\\
-        &= y_i^{n-1} * \alpha'(\sum_{i=0}^l w_{ik}^n*y_i^{n-1} + b_k^n) &\\
+        \frac{\partial{y_k^n}}{\partial{w_{ik}^n}} &= \frac{\partial{(\alpha(\sum_{i=0}^l w_{ik}^n*y_i^{n-1} + b_k^n))}}{\partial{w_{ik}^n}} = y_i^{n-1} * \alpha'(\sum_{i=0}^l w_{ik}^n*y_i^{n-1} + b_k^n) &\\
         \text{Donc :} &&&&\\
         \frac{\partial{E}}{\partial{w_{ik}^n}} &= y_i^{n-1}*(y_k^n-a_k)*\alpha'(\sum_{i=0}^l w_{ik}^n*y_i^{n-1} + b_k^n) &
     \end{flalign*}
 \end{frame}
-\begin{frame}{La rétropropagation - Suite}
-    Les choses se compliquent néanmoins pour les couches précédentes: en effet, la dérivée de l'erreur en fonction du poids ou des biais d'un neurone de la couche $k$ dépend de la dérivée de l'erreur en fonction de tous les neurones de la couche $k+1$ :
+\begin{frame}{La rétropropagation - Couches cachées}
+    %Les choses se compliquent néanmoins pour les couches précédentes: en effet, la dérivée de l'erreur en fonction du poids ou des biais d'un neurone de la couche $k$ dépend de la dérivée de l'erreur en fonction de tous les neurones de la couche $k+1$ :
+	La dérivée de l'erreur en fonction du poids ou des biais d'un neurone de la couche $k$ dépend de la dérivée de l'erreur en fonction de tous les neurones de la couche $k+1$ :
     \[ \frac{\partial{E}}{\partial{b_1^k}} = \sum_{i=0}^l \frac{\partial{E}}{\partial{y_i^{k+1}}} \frac{\partial{y_i^{k+1}}}{\partial{b_1^k}} \]
-Fort heureusement, on vient de calculer $ \frac{\partial{E}}{\partial{y_i^n}} $ et on peut simplement calculer $ \frac{\partial{y_i^n}}{\partial{b_1^{n-1}}} $. On peut donc mettre à jour les poids et les biais de la couche $n-1$. En appliquant récursivement cette méthode, on peut ainsi actualiser tous les poids et tous les biais du réseau.
+%Fort heureusement, on vient de calculer $ \frac{\partial{E}}{\partial{y_i^n}} $ et on peut simplement calculer $ \frac{\partial{y_i^n}}{\partial{b_1^{n-1}}} $. On peut donc mettre à jour les poids et les biais de la couche $n-1$. En appliquant récursivement cette méthode, on peut ainsi actualiser tous les poids et tous les biais du réseau.
 \end{frame}
-
-%\begin{frame}{}
-%
-%\[ P^{(k)} = W^{(k)}Y^{(k-1)}+B^{(k)}  \]
-%
-%\[ \alpha : x \mapsto \frac{1}{1+e^{-x}} \]
-%
-%\[ Y^{(k)} = \tilde\alpha(P^{(k)}) \]
-%
-%\[ E = \frac{1}{2} \sum_{i=1}^l (y_i^{(n)}-a_i)^2 \]
-%
-%\end{frame}
-%
-%\begin{frame}{}
-%
-%\[ b_i^{(n)} \longleftarrow b_i^{(n)} - \eta \frac{\partial{E}}{\partial{b_i^{(n)}}} \]
-%
-%\[ w_{ij}^{(n)} \longleftarrow w_{ij}^{(n)} - \eta \frac{\partial{E}}{\partial{w_{ij}^{(n)}}} \]
-%
-%\[ \frac{\partial{E}}{\partial{b_i^{(n)}}} = \frac{\partial{E}}{\partial{p_i^{(n)}}} \frac{\partial{p_i^{(n)}}}{\partial{b_i^{(n)}}} \]
-%
-%\[ p_i^{(n)} = \sum_{j=1}^l w_{ij}^{(n)} y_j^{(n-1)} + b_i^{(n)} \]
-%
-%\end{frame}
-%
-%\begin{frame}{}
-%
-%\[ \delta_i^{(n)} = \frac{\partial{E}}{\partial{p_i^{(n)}}} = \frac{\partial{E}}{\partial{b_i^{(n)}}} \]
-%
-%\[ \delta_i^{(n)} = \frac{\partial{E}}{\partial{p_i^{(n)}}} = \frac{\partial{E}}{\partial{y_i^{(n)}}} \frac{\partial{y_i^{(n)}}}{\partial{p_i^{(n)}}} \]
-%
-%\[ y_i^{(n)} = \alpha(p_i^{(n)}) \implies \frac{\partial{y_i^{(n)}}}{\partial{p_i^{(n)}}} = \alpha'(p_i^{(n)}) \]
-%
-%\[ E = \frac{1}{2} \sum_{i=1}^l (y_i^{(n)}-a_i)^2 \implies \frac{\partial{E}}{\partial{y_i^{(n)}}} = y_i^{(n)} - a_i \]
-%
-%\end{frame}
-%
-%\begin{frame}{}
-%
-%\[ \delta_i^{(n)} = \alpha'(p_i^{(n)}) (y_i^{(n)} - a_i) \]
-%
-%\[ \frac{\partial{E}}{\partial{w_{ij}^{(n)}}} = \frac{\partial{E}}{\partial{p_i^{(n)}}} \frac{\partial{p_i^{(n)}}}{\partial{w_{ij}^{(n)}}} \]
-%
-%\[ p_i^{(n)} = \sum_{j=1}^l w_{ij}^{(n)} y_j^{(n-1)} + b_i^{(n)} \implies \frac{\partial{E}}{\partial{w_{ij}^{(n)}}} = y_j^{(n-1)} \]
-%
-%\[ \frac{\partial{E}}{\partial{p_i^{(n)}}} = \delta_i^{(n)} = \alpha'(p_i^{(n)}) (y_i^{(n)} - a_i) \]
-%
-%\[ \frac{\partial{E}}{\partial{w_{ij}^{(n)}}} = \alpha'(p_i^{(n)}) (y_i^{(n)} - a_i) y_j^{(n-1)} \]
-%
-%\end{frame}
 
 %\section{Localisation des villes}
 %\frame{\sectionpage}
@@ -225,19 +214,7 @@ Fort heureusement, on vient de calculer $ \frac{\partial{E}}{\partial{y_i^n}} $ 
 
 
 \section{Fabrication d'une base de données}
-\frame{\sectionpage}
-
-\begin{frame}{Structure du réseau}
-	Notre réseau est découpé en deux réseaux de neurones distincts :\\
-	\quad - le premier détecte la présence d'une frontière sur une image;\\
-	\quad - le second traite uniquement les images contenant une frontière, et nous indique la courbe de la frontière sur cette image.\\
-	\vspace*{5px}
-	On pourrait envisager que le réseau retourne des couples de positions pour la frontière, mais il n'est pas possible de connaître à l'avance la longueur de la frontière, et donc le nombre de sorties qui seraient nécessaires. Nous nous sommes donc tournés vers les courbes de Bézier. Il s'agit de courbes polynomiales définies par un certain nombres de points de contrôle (6 dans notre cas):\\
-	\vspace*{-5px}
-	\begin{center}
-		\includegraphics[width=0.35\textwidth]{bezier.png}
-	\end{center}
-\end{frame}
+%\frame{\sectionpage}
 
 \begin{frame}{Milieux terre - mer}
 	\includegraphics{fabricationImage.png}
@@ -262,14 +239,74 @@ Fort heureusement, on vient de calculer $ \frac{\partial{E}}{\partial{y_i^n}} $ 
 	\includegraphics{tableau.png}
 \end{frame}
 
-\section{Résultats}
-\frame{\sectionpage}
-\frame{\center{\includegraphics{border_good.png}}}
-\frame{\center{\includegraphics{border_good1.png}}}
-\frame{\center{\includegraphics{border_bad.png}}}
+\section{Le programme}
+%\frame{\sectionpage}
+\begin{frame}{Structure du réseau}
+	\ Entrée \ $\longrightarrow$ \ Couche 1 $\longrightarrow$ Couche 2 $\longrightarrow$ Couche 3 $\longrightarrow$ Sortie \\
+	\scriptsize{1024 neurones $\longrightarrow$ 200 neurones $\longrightarrow$ 100 neurones $\longrightarrow$ 50 neurones $\longrightarrow$ 8 neurones}
+\end{frame}
+
+\begin{frame}{Fonctionnement du programme}
+	Deux réseaux de neurones distincts :\\
+	\quad 1) Détection de la présence d'une frontière sur une image;\\
+	\quad 2) Traitement des images contenant une frontière, et indication de la courbe de la frontière sur cette image.\\
+	%On pourrait envisager que le réseau retourne des couples de positions pour la frontière, mais il n'est pas possible de connaître à l'avance la longueur de la frontière, et donc le nombre de sorties qui seraient nécessaires. Nous nous sommes donc tournés vers les courbes de Bézier. Il s'agit de courbes polynomiales définies par un certain nombres de points de contrôle (6 dans notre cas):\\
+	\begin{center}
+		\includegraphics[width=0.5\textwidth]{bezier.png}
+	\end{center}
+\end{frame}
+
+\begin{frame}{Résultats sans prétraitement}
+	\center{\includegraphics[height=0.85\maxheight]{border_bad_sob.jpeg}}
+\end{frame}
+
+\begin{frame}{L'algorithme de Sobel}
+	\includegraphics{sobel.png}
+\end{frame}
+
+\begin{frame}{L'algorithme de Sobel}
+	$A = (a_{ij})$, matrice de l'image originale \\
+	\hspace*{10pt}
+
+	$ F_x = \left(
+	\begin{array}{ccc}
+	-1 & 0 & 1 \\ 
+	-2 & 0 & 2 \\ 
+	-1 & 0 & 1
+	\end{array} \right) $
+	\hspace*{60pt}
+	$ F_y = \left(
+	\begin{array}{ccc}
+	-1 & -2 & -1 \\ 
+	0 & 0 & 0 \\ 
+	1 & 2 & 1
+	\end{array} \right) $\\
+	\vspace*{20pt}
+	\[ c_{ij} = \sum^2_{p=0} \sum^2_{q=0} a_{(i+p),(j+q)} {f}_{pq} \]
+	\begin{center}
+		$g_{ij} = \sqrt{c_{x,ij}^2 + c_{y,ij}^2}$
+	\end{center}
+\end{frame}
+
+\begin{frame}{L'algorithme de Sobel}
+	\includegraphics{conv.jpeg}
+\end{frame}
+
+\begin{frame}{Résultats avec le filtre de Sobel}
+	\center{\includegraphics[height=0.85\maxheight]{border_good.jpeg}}
+\end{frame}
+\begin{frame}{Résultats avec le filtre de Sobel}
+	\center{\includegraphics[height=0.85\maxheight]{border_good1.jpeg}}
+\end{frame}
+\begin{frame}{Résultats avec le filtre de Sobel}
+	\center{\includegraphics[height=0.85\maxheight]{border_bad.jpeg}}
+\end{frame}
+
+\begin{frame}{Résultats avec des subdivisions plus petites}
+	\center{\includegraphics[height=0.85\maxheight]{border_best.jpeg}}
+\end{frame}
 
 \section{Annexe}
-\frame{\sectionpage}
 \begin{frame}{Un exemple simple: un porte logique ET à trois entrées}
 	\begin{tikzpicture}
 	[   cnode/.style={draw=black,fill=####1,minimum width=3mm,circle},

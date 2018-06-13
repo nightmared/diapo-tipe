@@ -226,6 +226,19 @@ Fort heureusement, on vient de calculer $ \frac{\partial{E}}{\partial{y_i^n}} $ 
 
 \section{Fabrication d'une base de données}
 \frame{\sectionpage}
+
+\begin{frame}{Structure du réseau}
+	Notre réseau est découpé en deux réseaux de neurones distincts :\\
+	\quad - le premier détecte la présence d'une frontière sur une image;\\
+	\quad - le second traite uniquement les images contenant une frontière, et nous indique la courbe de la frontière sur cette image.\\
+	\vspace*{5px}
+	On pourrait envisager que le réseau retourne des couples de positions pour la frontière, mais il n'est pas possible de connaître à l'avance la longueur de la frontière, et donc le nombre de sorties qui seraient nécessaires. Nous nous sommes donc tournés vers les courbes de Bézier. Il s'agit de courbes polynomiales définies par un certain nombres de points de contrôle (6 dans notre cas):\\
+	\vspace*{-5px}
+	\begin{center}
+		\includegraphics[width=0.35\textwidth]{bezier.png}
+	\end{center}
+\end{frame}
+
 \begin{frame}{Milieux terre - mer}
 	\includegraphics{fabricationImage.png}
 \end{frame}
@@ -251,17 +264,9 @@ Fort heureusement, on vient de calculer $ \frac{\partial{E}}{\partial{y_i^n}} $ 
 
 \section{Résultats}
 \frame{\sectionpage}
-\begin{frame}{Structure du réseau}
-	Notre réseau est découpé en deux réseaux de neurones distincts :\\
-	\quad - le premier détecte la présence d'une frontière sur une image;\\
-	\quad - le second traite uniquement les images contenant une frontière, et nous indique la courbe de la frontière sur cette image.\\
-	\vspace*{5px}
-	On pourrait envisager que le réseau retourne des couples de positions pour la frontière, mais il n'est pas possible de connaître à l'avance la longueur de la frontière, et donc le nombre de sorties qui seraient nécessaires. Nous nous sommes donc tournés vers les courbes de Bézier. Il s'agit de courbes polynomiales définies par un certain nombres de points de contrôle (6 dans notre cas):\\
-	\vspace*{-5px}
-	\begin{center}
-		\includegraphics[width=0.35\textwidth]{bezier.png}
-	\end{center}
-\end{frame}
+\frame{\center{\includegraphics{border_good.png}}}
+\frame{\center{\includegraphics{border_good1.png}}}
+\frame{\center{\includegraphics{border_bad.png}}}
 
 \section{Annexe}
 \frame{\sectionpage}
@@ -322,6 +327,5 @@ Fort heureusement, on vient de calculer $ \frac{\partial{E}}{\partial{y_i^n}} $ 
 \begin{frame}{Un exemple simple: un porte logique ET à trois entrées}
     \includegraphics{graph.png}
 \end{frame}
-
 
 \end{document}

@@ -53,8 +53,16 @@
 \tableofcontents
 \end{frame}
 
+\begin{frame}{Exemple d'image traitée}
+	\center{\includegraphics[height=0.85\maxheight]{leletest.jpg}}
+\end{frame}
+
+\begin{frame}{Résultat attendu}
+	\center{\includegraphics[height=0.85\maxheight]{leletest_courbe.jpg}}
+\end{frame}
+
 \begin{frame}{Structure générale}
-	\includegraphics{net-without-train.png}
+	\includegraphics{net.jpg}
 \end{frame}
 
 %\begin{frame}{Fonctionnement du réseau}
@@ -75,71 +83,98 @@
 	\begin{center}
 		$ Y^k = \tilde\alpha(W^k . Y^{k-1} + B^k) $ \\
 	\end{center}
-	\begin{tikzpicture}
-		[ >=stealth', thick]
-		\node (y0) at (0, 0) {$Y^0$};
-		\node (y1) at (4, 0) {$Y^1$};
-		\node (y2) at (8, 0) {$Y^2$};
-		\draw[->] (y0) -- node[anchor=south] {$\tilde\alpha(W^1.Y^0+B^1)$} (y1);
-		\draw[->] (y1) -- (y2);
-	\end{tikzpicture}
+\begin{minipage}{0.5\textwidth}
 
-	Avec :
     \begin{flalign*}
 		& \tilde\alpha : X = \begin{pmatrix}
             x_1 \\
             x_2 \\
             \vdots \\
-            x_n
+            x_l
         \end{pmatrix} \mapsto \begin{pmatrix}
             \alpha(x_1) \\
             \alpha(x_2) \\
             \vdots \\
-            \alpha(x_n)
-		\end{pmatrix} &&\\
-		& W^k = \begin{pmatrix}
+            \alpha(x_l)
+		\end{pmatrix} \\ 
+				& W^k = \begin{pmatrix}
             w_{11}^k  & w_{21}^k & \cdots & w_{l1}^k \\
             w_{12}^k  & w_{22}^k & \cdots & w_{l2}^k \\
             \vdots & \vdots & \ddots & \vdots \\
             w_{1l}^k  & w_{2l}^k & \cdots & w_{ll}^k
-		\end{pmatrix} &&
+		\end{pmatrix}
     \end{flalign*}
-\end{frame}
-
-\begin{frame}{Un exemple de fonction d'activation : la sigmoïde}
-	\begin{tikzpicture}
-
+	\end{minipage}%
+	\hfill%
+	\begin{minipage}{0.5\textwidth}\raggedleft
+		\begin{tikzpicture}
+\begin{tiny}
     \begin{axis}[
     	legend pos=north west,
         axis x line=middle,
         axis y line=middle,
-        x tick label style={/pgf/number format/fixed,
-                            /pgf/number format/fixed zerofill,
-                            /pgf/number format/precision=1},
-        y tick label style={/pgf/number format/fixed,
-                            /pgf/number format/fixed zerofill,
-                            /pgf/number format/precision=1},
+        %tick style={draw=none},
+		%axis line style={draw=none},
         grid = major,
-        width=12cm,
-        height=6cm,
+        width=6cm,
+        height=4cm,
         grid style={dashed, gray!30},
-        xmin=-10,     % start the diagram at this x-coordinate
-        xmax= 10,    % end   the diagram at this x-coordinate
-        ymin= 0,     % start the diagram at this y-coordinate
+        xmin=-5,     % start the diagram at this x-coordinate
+        xmax= 5,    % end   the diagram at this x-coordinate
+        ymin= -1,     % start the diagram at this y-coordinate
         ymax= 1,   % end   the diagram at this y-coordinate
         %axis background/.style={fill=white},
-        xlabel=x,
-        ylabel=y,
-        tick align=outside,
+        %xlabel=x,
+        %ylabel=y,
+        %tick align=outside,
         enlargelimits=false]
       % plot the stirling-formulae
-      \addplot[domain=-10:10, red, ultra thick,samples=100] {1/(1+exp(-1*x))};
-      \addlegendentry{$\alpha(x)=\frac{1}{1+e^{-x}}$}
+      \addplot[domain=-10:10, red, ultra thick,samples=100] {tanh(x)};
+      \addlegendentry{$\alpha(x)=\tanh(x)$}
 \end{axis}
+\end{tiny}
 
 
 	\end{tikzpicture}
+		\[B^k = \begin{pmatrix}
+            \alpha(b_1^k) \\
+            \alpha(b_2^k) \\
+            \vdots \\
+            \alpha(b_l^k)
+		\end{pmatrix} \]
 
+	\end{minipage}
+
+\end{frame}
+
+\begin{frame}{Fonctionnement du programme}
+	Deux réseaux de neurones distincts :\\
+	\quad 1) Détection de la présence d'une frontière sur une image;\\
+	\quad 2) Traitement des images contenant une frontière, et indication de la courbe de la frontière sur cette image.\\
+	%On pourrait envisager que le réseau retourne des couples de positions pour la frontière, mais il n'est pas possible de connaître à l'avance la longueur de la frontière, et donc le nombre de sorties qui seraient nécessaires. Nous nous sommes donc tournés vers les courbes de Bézier. Il s'agit de courbes polynomiales définies par un certain nombres de points de contrôle (6 dans notre cas):\\
+	\begin{center}
+		\includegraphics[width=0.5\textwidth]{bezier.png}
+	\end{center}
+\end{frame}
+
+\begin{frame}{Découpage d'une image}
+	\center{\includegraphics[height=0.85\maxheight]{leletest_squared.jpg}}
+\end{frame}
+
+\begin{frame}{Structure du réseau}
+	\noindent\begin{minipage}{0.82\textwidth}% adapt widths of minipages to your needs
+	\textbf{Détection de la présence d'une frontière}\\
+	\ Entrée \ $\longrightarrow$ \ Couche 1 $\longrightarrow$ Sortie \\
+	\scriptsize{100 neurones $\longrightarrow$ 50 neurones $\longrightarrow$ 2 neurones}\\
+\newline
+\normalsize{\textbf{Détection des points de contrôles}}\\
+	\ Entrée \ $\longrightarrow$ \ Couche 1 $\longrightarrow$ Couche 2 $\longrightarrow$ Couche 3 $\longrightarrow$ Sortie \\
+	\scriptsize{400 neurones $\longrightarrow$ 200 neurones $\longrightarrow$ 100 neurones $\longrightarrow$ 50 neurones $\longrightarrow$ 8 neurones}
+	\end{minipage}%
+	\hfill%
+	\begin{minipage}{0.18\textwidth}\raggedleft
+	\includegraphics[width=0.7\linewidth]{sorties.png}
+	\end{minipage}
 \end{frame}
 
 \section{La rétropropagation}
@@ -155,42 +190,43 @@
     %Les données d'entrées ne sont pas des paramètres de notre fonction d'erreur, car on cherche à réduire l'erreur du réseau en modifiant les variables du réseau et non pas l'entrée, cela n'aurait pas de sens : $ E = E(w_{11}^1, w_{12}^n, ..., w_{ll}^n, b_1^1, n_2^1, ..., b_l^n) $.
     %Pour ce faire, on dérive l'erreur par rapport aux paramètres de notre réseau (les poids et les biais). \\
     %Puis on mets à jour les poids et les biais :
-	\[ E = E(w_{11}^1, w_{12}^1, ..., w_{ll}^n, b_1^1, b_2^1, ..., b_l^n) \]
-    \[ w_{ij}^n \longleftarrow w_{ij}^n - \eta \frac{\partial{E}}{\partial{w_{ij}^n}} \]
-    \[ b_i^n \longleftarrow b_i^n - \eta \frac{\partial{E}}{\partial{b_i^n}} \]
+	\begin{align*}
+		E &= \frac{1}{2} \sum_{i=1}^l (y_i^n-a_i)^2 \\
+		&= E(w_{11}^1, w_{12}^1, ..., w_{ll}^n, b_1^1, b_2^1, ..., b_l^n) \\
+		w_{ij}^k &\longleftarrow w_{ij}^k - \eta \frac{\partial{E}}{\partial{w_{ij}^k}} \\
+		b_i^k &\longleftarrow b_i^k - \eta \frac{\partial{E}}{\partial{b_i^k}}
+	\end{align*}
     %Les problèmes qui ont longtemps concentrés les efforts de la recherche sur les réseaux de neurones, outre la lourdeur de calcul, tournaient autour de la difficulté à concevoir et entraîner des réseaux multicouches. C'est là que l'algorithme de la rétropropagation appraît : il exploite le \textbf{théorème de dérivation des fonctions composées} pour calculer toutes ces dérivées.\\
     %L'algorithme est itératif, travaillant couche par couche, en partant de la dernière couche et en remontant jusqu'à la couche d'entrée du réseau, d'où son nom. \\
     %Un exemple assez classique de fonction d'erreur est la distance quadratique entre le vecteur obtenu et le vecteur attendu :
-    \[ E = \frac{1}{2} \sum_{i=1}^l (y_i^n-a_i)^2 \]
 \end{frame}
 
 \begin{frame}{La rétropropagation - Dernière couche}
-    Les calculs sont très simples pour la première couche :
     \begin{flalign*}
-        \frac{\partial{E}}{\partial{b_k^n}} &= \frac{\partial{E}}{\partial{y_k^n}} \frac{\partial{y_k^n}}{\partial{b_k^n}} &\\
+        \frac{\partial{E}}{\partial{b_j^n}} &= \frac{\partial{E}}{\partial{y_j^n}} \frac{\partial{y_j^n}}{\partial{b_j^n}} &\\
         \text{Or :}  &&\\
-        \frac{\partial{E}}{\partial{y_k^n}} &= y_k^n-a_k &\\
-        \frac{\partial{y_k^n}}{\partial{b_k^n}} &= \frac{\partial{(\alpha(\sum_{i=0}^l w_{ik}^n*y_i^{n-1} + b_k^n))}}{\partial{b_k^n}} = \alpha'(\sum_{i=0}^l w_{ik}^n*y_i^{n-1} + b_k^n) &\\
+        \frac{\partial{E}}{\partial{y_j^n}} &= y_j^n-a_j &\\
+        \frac{\partial{y_j^n}}{\partial{b_j^n}} &= \frac{\partial{(\alpha(\sum_{i=0}^l w_{ij}^n*y_i^{n-1} + b_j^n))}}{\partial{b_j^n}} = \alpha'(\sum_{i=0}^l w_{ij}^n*y_i^{n-1} + b_j^n) &\\
         \text{Donc :} &&\\
-        \frac{\partial{E}}{\partial{b_k^n}} &= (y_k^n-a_k)*\alpha'(\sum_{i=0}^l w_{ik}^n*y_i^{n-1} + b_k^n) &
+        \frac{\partial{E}}{\partial{b_j^n}} &= (y_j^n-a_j)*\alpha'(\sum_{i=0}^l w_{ij}^n*y_i^{n-1} + b_j^n) &
     \end{flalign*}
 \end{frame}
 
 \begin{frame}{La rétropropagation - Dernière couche}
     Il en va de même pour les poids:
     \begin{flalign*}
-        \frac{\partial{E}}{\partial{w_{ik}^n}} &= \frac{\partial{E}}{\partial{y_k^n}} \frac{\partial{y_k^n}}{\partial{w_{ik}^n}} &\\
+        \frac{\partial{E}}{\partial{w_{ij}^n}} &= \frac{\partial{E}}{\partial{y_j^n}} \frac{\partial{y_j^n}}{\partial{w_{ij}^n}} &\\
         \text{Or :}  &&&&\\
-        \frac{\partial{E}}{\partial{y_k^n}} &= y_k^n-a_k &\\
-        \frac{\partial{y_k^n}}{\partial{w_{ik}^n}} &= \frac{\partial{(\alpha(\sum_{i=0}^l w_{ik}^n*y_i^{n-1} + b_k^n))}}{\partial{w_{ik}^n}} = y_i^{n-1} * \alpha'(\sum_{i=0}^l w_{ik}^n*y_i^{n-1} + b_k^n) &\\
+        \frac{\partial{E}}{\partial{y_j^n}} &= y_j^n-a_j &\\
+        \frac{\partial{y_j^n}}{\partial{w_{ij}^n}} &= \frac{\partial{(\alpha(\sum_{i=0}^l w_{ij}^n*y_i^{n-1} + b_j^n))}}{\partial{w_{ij}^n}} = y_i^{n-1} * \alpha'(\sum_{i=0}^l w_{ij}^n*y_i^{n-1} + b_j^n) &\\
         \text{Donc :} &&&&\\
-        \frac{\partial{E}}{\partial{w_{ik}^n}} &= y_i^{n-1}*(y_k^n-a_k)*\alpha'(\sum_{i=0}^l w_{ik}^n*y_i^{n-1} + b_k^n) &
+        \frac{\partial{E}}{\partial{w_{ij}^n}} &= y_i^{n-1}*(y_j^n-a_j)*\alpha'(\sum_{i=0}^l w_{ij}^n*y_i^{n-1} + b_j^n) &
     \end{flalign*}
 \end{frame}
 \begin{frame}{La rétropropagation - Couches cachées}
     %Les choses se compliquent néanmoins pour les couches précédentes: en effet, la dérivée de l'erreur en fonction du poids ou des biais d'un neurone de la couche $k$ dépend de la dérivée de l'erreur en fonction de tous les neurones de la couche $k+1$ :
 	La dérivée de l'erreur en fonction du poids ou des biais d'un neurone de la couche $k$ dépend de la dérivée de l'erreur en fonction de tous les neurones de la couche $k+1$ :
-    \[ \frac{\partial{E}}{\partial{b_1^k}} = \sum_{i=0}^l \frac{\partial{E}}{\partial{y_i^{k+1}}} \frac{\partial{y_i^{k+1}}}{\partial{b_1^k}} \]
+    \[ \frac{\partial{E}}{\partial{b_j^k}} = \sum_{i=0}^l \frac{\partial{E}}{\partial{y_i^{k+1}}} \frac{\partial{y_i^{k+1}}}{\partial{b_j^k}} \]
 %Fort heureusement, on vient de calculer $ \frac{\partial{E}}{\partial{y_i^n}} $ et on peut simplement calculer $ \frac{\partial{y_i^n}}{\partial{b_1^{n-1}}} $. On peut donc mettre à jour les poids et les biais de la couche $n-1$. En appliquant récursivement cette méthode, on peut ainsi actualiser tous les poids et tous les biais du réseau.
 \end{frame}
 
@@ -236,74 +272,40 @@
 \end{frame}
 
 \begin{frame}{}
-	\includegraphics{tableau.png}
+	\center{\includegraphics{tableau.png}}
 \end{frame}
 
-\section{Le programme}
+\section{Les résultats}
 %\frame{\sectionpage}
-\begin{frame}{Structure du réseau}
-	\ Entrée \ $\longrightarrow$ \ Couche 1 $\longrightarrow$ Couche 2 $\longrightarrow$ Couche 3 $\longrightarrow$ Sortie \\
-	\scriptsize{1024 neurones $\longrightarrow$ 200 neurones $\longrightarrow$ 100 neurones $\longrightarrow$ 50 neurones $\longrightarrow$ 8 neurones}
-\end{frame}
-
-\begin{frame}{Fonctionnement du programme}
-	Deux réseaux de neurones distincts :\\
-	\quad 1) Détection de la présence d'une frontière sur une image;\\
-	\quad 2) Traitement des images contenant une frontière, et indication de la courbe de la frontière sur cette image.\\
-	%On pourrait envisager que le réseau retourne des couples de positions pour la frontière, mais il n'est pas possible de connaître à l'avance la longueur de la frontière, et donc le nombre de sorties qui seraient nécessaires. Nous nous sommes donc tournés vers les courbes de Bézier. Il s'agit de courbes polynomiales définies par un certain nombres de points de contrôle (6 dans notre cas):\\
-	\begin{center}
-		\includegraphics[width=0.5\textwidth]{bezier.png}
-	\end{center}
-\end{frame}
-
 \begin{frame}{Résultats sans prétraitement}
-	\center{\includegraphics[height=0.85\maxheight]{border_bad_sob.jpeg}}
+	\center{\includegraphics[height=0.8\maxheight]{border_bad_sob.jpeg}}
+	\textit{\tiny{\\source : NASA}}
 \end{frame}
 
-\begin{frame}{L'algorithme de Sobel}
+\begin{frame}{Application de l'algorithme de Sobel}
 	\includegraphics{sobel.png}
 \end{frame}
 
-\begin{frame}{L'algorithme de Sobel}
-	$A = (a_{ij})$, matrice de l'image originale \\
-	\hspace*{10pt}
-
-	$ F_x = \left(
-	\begin{array}{ccc}
-	-1 & 0 & 1 \\ 
-	-2 & 0 & 2 \\ 
-	-1 & 0 & 1
-	\end{array} \right) $
-	\hspace*{60pt}
-	$ F_y = \left(
-	\begin{array}{ccc}
-	-1 & -2 & -1 \\ 
-	0 & 0 & 0 \\ 
-	1 & 2 & 1
-	\end{array} \right) $\\
-	\vspace*{20pt}
-	\[ c_{ij} = \sum^2_{p=0} \sum^2_{q=0} a_{(i+p),(j+q)} {f}_{pq} \]
-	\begin{center}
-		$g_{ij} = \sqrt{c_{x,ij}^2 + c_{y,ij}^2}$
-	\end{center}
-\end{frame}
-
-\begin{frame}{L'algorithme de Sobel}
-	\includegraphics{conv.jpeg}
-\end{frame}
-
 \begin{frame}{Résultats avec le filtre de Sobel}
-	\center{\includegraphics[height=0.85\maxheight]{border_good.jpeg}}
+	\center{\includegraphics[height=0.8\maxheight]{border_good1.jpeg}}
+	\textit{\tiny{\\source : NASA}}
 \end{frame}
 \begin{frame}{Résultats avec le filtre de Sobel}
-	\center{\includegraphics[height=0.85\maxheight]{border_good1.jpeg}}
+	\center{\includegraphics[height=0.8\maxheight]{border_good.jpeg}}
+	\textit{\tiny{\\source : IGN}}
 \end{frame}
 \begin{frame}{Résultats avec le filtre de Sobel}
-	\center{\includegraphics[height=0.85\maxheight]{border_bad.jpeg}}
+	\center{\includegraphics[height=0.8\maxheight]{border_bad.jpeg}}
+	\textit{\tiny{\\source : NASA}}
 \end{frame}
+%
+%\begin{frame}{Résultats avec des subdivisions plus petites}
+%	\center{\includegraphics[height=0.8\maxheight]{border_best.jpeg}}
+%	\textit{\tiny{\\source : NASA}}
+%\end{frame}
 
-\begin{frame}{Résultats avec des subdivisions plus petites}
-	\center{\includegraphics[height=0.85\maxheight]{border_best.jpeg}}
+\begin{frame}{}
+	\center{ \huge Merci de votre attention}
 \end{frame}
 
 \section{Annexe}
@@ -364,5 +366,34 @@
 \begin{frame}{Un exemple simple: un porte logique ET à trois entrées}
     \includegraphics{graph.png}
 \end{frame}
+
+\begin{frame}{L'algorithme de Sobel}
+	$A = (a_{ij})$, matrice de l'image originale \\
+	\hspace*{10pt}
+
+	$ F_x = \left(
+	\begin{array}{ccc}
+	-1 & 0 & 1 \\ 
+	-2 & 0 & 2 \\ 
+	-1 & 0 & 1
+	\end{array} \right) $
+	\hspace*{60pt}
+	$ F_y = \left(
+	\begin{array}{ccc}
+	-1 & -2 & -1 \\ 
+	0 & 0 & 0 \\ 
+	1 & 2 & 1
+	\end{array} \right) $\\
+	\vspace*{20pt}
+	\[ c_{ij} = \sum^2_{p=0} \sum^2_{q=0} a_{(i+p),(j+q)} {f}_{pq} \]
+	\begin{center}
+		$g_{ij} = \sqrt{c_{x,ij}^2 + c_{y,ij}^2}$
+	\end{center}
+\end{frame}
+
+\begin{frame}{L'algorithme de Sobel}
+	\includegraphics{conv.jpeg}
+\end{frame}
+
 
 \end{document}

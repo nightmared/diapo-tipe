@@ -1,0 +1,8 @@
+Bonjour,
+Nous allons vous présenter notre programme de reconnaissance de frontières sur des images satellites.
+Au cours de notre TIPE, nous avons développé un logiciel qui prends en entrée des images de 1000x1000, cf. slide et nous souhaitons obtenir ce genre de résultats: cf. slide.
+Pour ce faire, nous allons employer des réseaux de neurones artificiels simples (appelé Feed-Forward Neural networks), donc la structure est schématisée ci-contre.
+Il faut considérer un réseau de neurones comme un tableau de couches, où chaque couche est un vecteurs de nombres compris entre -1 et 1. Et chaque valeur au sein de cette couche est appelée un neurone. On a donc des couches de neurones, d'où le nom de réseaux de neurones.
+On numérote les couches de 0 à n, avec 0 la première couche et n la couche de sortie. Pour simplifier, on considérera que chaque couche de neurone contient l neurones.
+Pour chaque image que l'on souhaite traiter, on stocke l'intensité de chaque pixel dans la première couche, $Y^0$. Puis on propage les données couche par couche, en effectuant une somme pondérée des neurones précédents, d'après la formule .... Enfin, on récupère les données de sorties de la couche de sortie.
+Pour cela, on applique la formule suivante: on obtient la couche k à partir de la couche k-1 en mutlipliantc ette couche par des poids, stockés dans la matrice $W^k$, et en ajoutant des biais, stockés dans la matrice $B^k$. NB: les poids et biais dépendent donc de chaque couche, cela va jouer un rôle important par la suite. Cette valeur est ensuite normalisée en lui passant une fonction dite d'activation, noté α, 

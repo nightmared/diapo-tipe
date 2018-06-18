@@ -41,10 +41,12 @@ Les choses se compliquent néanmoins pour les couches précédentes: en effet, l
 On peut donc calculer ces dérivées pour la dernière couche, c'est une petit peu calculatoire, on ne va donc pas s'attarder dessus. Là où l'algorithme devient intéressant, c'est pour calculer la dérivée des poids et biais pour les couches cachées (çàd les couches 0<i<n), 
 Fort heureusement, on vient de calculer $ \frac{\partial{E}}{\partial{y_i^n}} $ et on peut simplement calculer $ \frac{\partial{y_i^n}}{\partial{b_1^{n-1}}} $. On peut donc mettre à jour les poids et les biais de la couche $n-1$. En appliquant récursivement cette méthode, on peut ainsi actualiser tous les poids et tous les biais du réseau.
 
-#15
-On a créé pour cela une base de données artificielles
+#15->17
+On a créé pour cela une base de données artificielles pour entraîner le second réseau de la manière suivante :
+On choisit deux carrés issus de différents milieux (terre/mer dans nos cas), puis on génère une courbe de Bézier de manière aléatoire, et applique les deux milieux de part et d'autre de cette frontière, enfin on applique une rotation et un flou sur cette image. Finalement, on fait varier la luminosité.
 
+#18
+Quelques exemples...
 
-
-
-%    Afin de ne passer aux réseau que des images qui comportent une ville, un prétraitement est appliqué: une convolution sur l'image puis un traitement par seuil est utilisé (si le pixel de couleur maximale obtenu excède un certain seuil, on considère que l'image comporte une ville et on demande alors au réseau d'identifier sa position).
+#19->23
+Les résultats + emploi du filtre de sobel: afin de ne passer aux réseau que des images qui comportent une ville, un prétraitement est appliqué: un filtre (Sobel) puis un traitement par seuil est utilisé (si le pixel de couleur maximale obtenu excède un certain seuil, on considère que l'image comporte une ville et on demande alors au réseau d'identifier sa position).

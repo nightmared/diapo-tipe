@@ -1,8 +1,50 @@
+#1-2-3-4
 Bonjour,
 Nous allons vous présenter notre programme de reconnaissance de frontières sur des images satellites.
 Au cours de notre TIPE, nous avons développé un logiciel qui prends en entrée des images de 1000x1000, cf. slide et nous souhaitons obtenir ce genre de résultats: cf. slide.
+
+#5-6
 Pour ce faire, nous allons employer des réseaux de neurones artificiels simples (appelé Feed-Forward Neural networks), donc la structure est schématisée ci-contre.
 Il faut considérer un réseau de neurones comme un tableau de couches, où chaque couche est un vecteurs de nombres compris entre -1 et 1. Et chaque valeur au sein de cette couche est appelée un neurone. On a donc des couches de neurones, d'où le nom de réseaux de neurones.
-On numérote les couches de 0 à n, avec 0 la première couche et n la couche de sortie. Pour simplifier, on considérera que chaque couche de neurone contient l neurones.
-Pour chaque image que l'on souhaite traiter, on stocke l'intensité de chaque pixel dans la première couche, $Y^0$. Puis on propage les données couche par couche, en effectuant une somme pondérée des neurones précédents, d'après la formule .... Enfin, on récupère les données de sorties de la couche de sortie.
-Pour cela, on applique la formule suivante: on obtient la couche k à partir de la couche k-1 en mutlipliantc ette couche par des poids, stockés dans la matrice $W^k$, et en ajoutant des biais, stockés dans la matrice $B^k$. NB: les poids et biais dépendent donc de chaque couche, cela va jouer un rôle important par la suite. Cette valeur est ensuite normalisée en lui passant une fonction dite d'activation, noté α, 
+On numérote les couches de 0 à n, avec 0 la première couche et n la couche de sortie. Pour simplifier, on considérera que chaque couche de neurones contient l neurones.
+Pour chaque image que l'on souhaite traiter, on stocke l'intensité de chaque pixel dans la première couche, $Y^0$. Puis on propage les données couche par couche. Enfin, on récupère les données de sorties de la couche de sortie.
+Pour cela, on applique la formule suivante: on obtient la couche k à partir de la couche k-1 en mutlipliant cette couche par des poids, stockés dans la matrice $W^k$, et en ajoutant des biais, stockés dans la matrice $B^k$. Cette valeur est ensuite normalisée en lui passant une fonction dérivable dite d'activation, noté α, qui permet de borner les valeurs entre -1 et 1, de manière à éviter des divergences numériques et améliorer l'efficacité du réseau.
+NB: les poids et biais dépendent donc de chaque couche, cela va jouer un rôle important par la suite.
+//Point notation: on note le poids allant du neurone i au neurone j de la couche $w_{ij}^k$. De même, on note le biais du neurone i de la couche k $b_i^k$.
+
+#7
+Comment fonctionne notre programme ?
+Notre programme est basé sur deux réseaux de neurones distincts:
+	1) Détecter la présence d'une frontière
+	2) Détecter la courbe de la frontière sur les images qui en contiennent une, et génération d'une courbe de bézier pour approximer la frontière.
+//On pourrait envisager que le réseau retourne des couples de positions pour la frontière, mais il n'est pas possible de connaître à l'avance la longueur de la frontière, et donc le nombre de sorties qui seraient nécessaires. Nous nous sommes donc tournés vers les courbes de Bézier. Il s'agit de courbes polynomiales définies par un certain nombres de points de contrôle (6 dans notre cas)
+
+#8
+Pour des raisons de taille du réseau et donc de quantité de calculs, nous avons choisi de subdiviser l'image en carrés de petite taille (~ 20x20), comme vous pouvez le voir, qui seront donc traités indépendamment par notre réseau.
+
+#9
+Voici comment notre réseau sera structuré : cf. slide.
+
+#10
+De l'importance de distinguer deux phases dans la création du réseau: l'entrainement et l'utilisation.
+À l'instar du théorème d'approximation d'une fonction continue par un polynôme (Stone-Weierstrass), les réseaux de neurones ont pour but d'approximer une fonction dont on ne connaît généralement pas l'expression. Pour ce faire, on utilise généralement l'algorithme dit de «descente du gradient». Le principe est le suivant :
+    - Le gradient indique la direction de l'augmentation d'une fonction.
+    - On peut donc considérer la fonction $E$ qui indique l'«erreur» du réseau, c'est à dire la distance entre les sorties du réseau et les valeurs attendues en sortie.
+    - Notre but est donc de faire tendre les sorties du réseau vers les valeurs attendues, donc de minimiser cette fonction.
+Pour cela, on emploie l'algorithme de descente du gradient : on calcule la dérivée de l'erreur par rapport à chaque poids et biais du réseau, et on actualise les poids et biais de manière à réduire cette erreur.
+En effectuant cet entraînement sur un nombre conséquent d'images, l'algorithme va faire tendre le réseau vers un minimum local de la fonction d'erreur, et donc faire approcher les sorties du réseau des résultats attendus.
+
+#11->14
+Les problèmes qui ont longtemps concentrés les efforts de la recherche sur les réseaux de neurones, outre la lourdeur de calcul, tournaient autour de la difficulté à concevoir et entraîner des réseaux multicouches. C'est là que l'algorithme de la rétropropagation appraît : il exploite le \textbf{théorème de dérivation des fonctions composées} pour calculer toutes ces dérivées.
+L'algorithme est itératif, travaillant couche par couche, en partant de la dernière couche et en remontant jusqu'à la couche d'entrée du réseau, d'où son nom.
+Les choses se compliquent néanmoins pour les couches précédentes: en effet, la dérivée de l'erreur en fonction du poids ou des biais d'un neurone de la couche $k$ dépend de la dérivée de l'erreur en fonction de tous les neurones de la couche $k+1$.
+On peut donc calculer ces dérivées pour la dernière couche, c'est une petit peu calculatoire, on ne va donc pas s'attarder dessus. Là où l'algorithme devient intéressant, c'est pour calculer la dérivée des poids et biais pour les couches cachées (çàd les couches 0<i<n), 
+Fort heureusement, on vient de calculer $ \frac{\partial{E}}{\partial{y_i^n}} $ et on peut simplement calculer $ \frac{\partial{y_i^n}}{\partial{b_1^{n-1}}} $. On peut donc mettre à jour les poids et les biais de la couche $n-1$. En appliquant récursivement cette méthode, on peut ainsi actualiser tous les poids et tous les biais du réseau.
+
+#15
+On a créé pour cela une base de données artificielles
+
+
+
+
+%    Afin de ne passer aux réseau que des images qui comportent une ville, un prétraitement est appliqué: une convolution sur l'image puis un traitement par seuil est utilisé (si le pixel de couleur maximale obtenu excède un certain seuil, on considère que l'image comporte une ville et on demande alors au réseau d'identifier sa position).
